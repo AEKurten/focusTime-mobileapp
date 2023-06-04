@@ -29,9 +29,7 @@ const Focus = ({ addSubject }) => {
 export default Focus;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: {},
   inputContainer: {
     padding: SPACING.lg,
     justifyContent: "top",

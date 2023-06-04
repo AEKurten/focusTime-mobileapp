@@ -5,6 +5,8 @@ import { RoundedButton } from "../components/RoundedButton";
 import { SPACING } from "../utils/SIZES";
 import { COLORS } from "../utils/COLORS";
 import { ProgressBar } from "react-native-paper";
+import { useKeepAwake } from "expo-keep-awake";
+import Timing from "./Timing";
 
 const ONE_SECOND_IN_MS = 1000;
 
@@ -17,19 +19,26 @@ const PATTERN = [
 ];
 
 const Timer = ({ clearSubject, onTimerEnd, focusSubject }) => {
+  useKeepAwake();
   const [isStarted, setIsStarted] = useState(false);
   const [progress, setProgress] = useState(1);
   const [minutes, setMinutes] = useState(0.1);
+
+  const onEnd = (reset) => {
+    Vibration.vibrate(PATTERN);
+    setIsStarted(false);
+    setProgress(1);
+    reset();
+    onTimerEnd(focusSubject);
+  };
   return (
     <View style={styles.container}>
       <View style={styles.countdown}>
         <Countdown
-          minutes={0.2}
+          minutes={minutes}
           onProgress={setProgress}
           isPaused={!isStarted}
-          onEnd={() => {
-            Vibration.vibrate(PATTERN);
-          }}
+          onEnd={onEnd}
         />
         <View style={styles.indicator}>
           <Text style={styles.title}>Focusing on</Text>
@@ -42,6 +51,9 @@ const Timer = ({ clearSubject, onTimerEnd, focusSubject }) => {
           style={{ height: 10 }}
           progress={progress}
         />
+      </View>
+      <View style={styles.timingWrapper}>
+        <Timing onChangeTime={setMinutes} />
       </View>
       <View style={styles.buttonWrapper}>
         {!isStarted && (
@@ -58,6 +70,9 @@ const Timer = ({ clearSubject, onTimerEnd, focusSubject }) => {
             onPress={() => setIsStarted(false)}
           />
         )}
+      </View>
+      <View style={styles.clearSubject}>
+        <RoundedButton size={50} title="Clear" onPress={clearSubject} />
       </View>
     </View>
   );
@@ -77,7 +92,7 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     flex: 0.3,
     flexDirection: "row",
-    padding: 15,
+    padding: SPACING.md,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -92,5 +107,14 @@ const styles = StyleSheet.create({
   task: {
     color: COLORS.white,
     textAlign: "center",
+  },
+  timingWrapper: {
+    flex: 0.1,
+    paddingTop: SPACING.xxl,
+    flexDirection: "row",
+  },
+  clearSubject: {
+    flexDirection: "row",
+    justifyContent: "center",
   },
 });
